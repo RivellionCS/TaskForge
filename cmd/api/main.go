@@ -31,6 +31,4 @@ func main() {
 	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Connected to PostgreSQL")
 }

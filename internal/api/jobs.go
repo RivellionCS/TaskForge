@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/RivellionCS/TaskForge/internal/jobs"
+	"github.com/google/uuid"
 )
 
 type JobHandler struct {
@@ -55,4 +56,27 @@ func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h *JobHandler) GetJob( w http.ResponseWriter, r *http.Request) {
+	idString := r.PathValue("id")
+
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		http.Error(w, "invalid job ID", http.StatusBadRequest)
+		return
+	}
+
+	job, err := h.repository.GetByID(r.Context(), id)
+	if err != nil {
+		http.Error(w, "job not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(job); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

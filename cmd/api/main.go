@@ -25,6 +25,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /jobs", jobHandler.CreateJob)
+	mux.HandleFunc("GET /jobs/{id}", jobHandler.GetJob)
 
 	log.Println("TaskForge API listening on :8080")
 

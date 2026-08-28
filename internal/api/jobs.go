@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/RivellionCS/TaskForge/internal/jobs"
@@ -69,6 +70,7 @@ func (h *JobHandler) GetJob( w http.ResponseWriter, r *http.Request) {
 
 	job, err := h.repository.GetByID(r.Context(), id)
 	if err != nil {
+		log.Printf("GetByID error: %v", err)
 		http.Error(w, "job not found", http.StatusNotFound)
 		return
 	}

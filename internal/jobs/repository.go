@@ -49,3 +49,37 @@ func (r *Repository) Create(
 
 	return id, nil
 }
+
+func (r *Repository) GetByID(
+	ctx context.Context,
+	id uuid.UUID,
+) (*Job, error) {
+	var job Job
+
+	err := r.db.QueryRow(
+		ctx,
+		`
+		SELECT id, type, status, payload, result, attempts,
+		       created_at, started_at, completed_at
+		FROM jobs
+		WHERE id = $1
+		`,
+		id,
+	).Scan(
+		&job.ID,
+		&job.Type,
+		&job.Status,
+		&job.Payload,
+		&job.Result,
+		&job.Attempts,
+		&job.CreatedAt,
+		&job.StartedAt,
+		&job.CompletedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("get job: %w", err)
+	}
+
+	return &job, nil
+}

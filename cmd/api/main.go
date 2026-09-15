@@ -30,6 +30,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := rabbitmq.PublishJob("test-job-123"); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Test job published to RabbitMQ")
+
 	jobRepository := jobs.NewRepository(db)
 	jobHandler := api.NewJobHandler(jobRepository)
 

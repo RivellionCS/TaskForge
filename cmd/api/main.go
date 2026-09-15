@@ -31,7 +31,7 @@ func main() {
 	}
 
 	jobRepository := jobs.NewRepository(db)
-	jobHandler := api.NewJobHandler(jobRepository)
+	jobHandler := api.NewJobHandler(jobRepository, rabbitmq)
 
 	mux := http.NewServeMux()
 

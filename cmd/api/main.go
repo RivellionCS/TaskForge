@@ -8,6 +8,7 @@ import (
 	"github.com/RivellionCS/TaskForge/internal/api"
 	"github.com/RivellionCS/TaskForge/internal/database"
 	"github.com/RivellionCS/TaskForge/internal/jobs"
+	"github.com/RivellionCS/TaskForge/internal/queue"
 )
 
 func main() {
@@ -18,6 +19,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	rabbitmq, err := queue.NewRabbitMQ()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rabbitmq.Close()
 
 	jobRepository := jobs.NewRepository(db)
 	jobHandler := api.NewJobHandler(jobRepository)

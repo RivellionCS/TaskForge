@@ -33,3 +33,20 @@ func (r *RabbitMQ) Close() {
 	r.channel.Close()
 	r.conn.Close()
 }
+
+func (r *RabbitMQ) DeclareQueue() error {
+	_, err := r.channel.QueueDeclare(
+		"jobs",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("declare jobs queue: %w", err)
+	}
+
+	return nil
+}

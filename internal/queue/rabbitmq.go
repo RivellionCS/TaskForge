@@ -50,3 +50,24 @@ func (r *RabbitMQ) DeclareQueue() error {
 
 	return nil
 }
+
+func (r *RabbitMQ) PublishJob(jobID string) error {
+	message := []byte(jobID)
+
+	err := r.channel.Publish(
+		"",
+		"jobs",
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body: message,
+		},
+	)
+
+	if err != nil {
+		return fmt.Errorf("publish job: %w", err)
+	}
+
+	return nil
+}

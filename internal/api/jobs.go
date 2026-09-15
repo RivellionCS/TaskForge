@@ -6,16 +6,22 @@ import (
 	"net/http"
 
 	"github.com/RivellionCS/TaskForge/internal/jobs"
+	"github.com/RivellionCS/TaskForge/internal/queue"
 	"github.com/google/uuid"
 )
 
 type JobHandler struct {
 	repository *jobs.Repository
+	rabbitmq *queue.RabbitMQ
 }
 
-func NewJobHandler(repository *jobs.Repository) *JobHandler {
+func NewJobHandler(
+	repository *jobs.Repository,
+	rabbitmq *queue.RabbitMQ,
+	) *JobHandler {
 	return &JobHandler{
 		repository: repository,
+		rabbitmq: rabbitmq,
 	}
 }
 

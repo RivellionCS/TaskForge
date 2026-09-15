@@ -71,3 +71,21 @@ func (r *RabbitMQ) PublishJob(jobID string) error {
 
 	return nil
 }
+
+func (r *RabbitMQ) ConsumeJobs() (<-chan amqp.Delivery, error) {
+	messages, err := r.channel.Consume(
+		"jobs",
+		"",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("consume jobs: %w", err)
+	}
+	
+	return messages, nil
+}

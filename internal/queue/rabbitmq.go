@@ -12,7 +12,7 @@ type RabbitMQ struct {
 }
 
 func NewRabbitMQ() (*RabbitMQ, error) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
+	conn, err := amqp.Dial("amqp://taskforge:taskforge@localhost:5672")
 	if err != nil {
 		return nil, fmt.Errorf("Connect to RabbitMQ: %w", err)
 	}

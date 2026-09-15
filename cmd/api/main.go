@@ -26,6 +26,10 @@ func main() {
 	}
 	defer rabbitmq.Close()
 
+	if err := rabbitmq.DeclareQueue(); err != nil {
+		log.Fatal(err)
+	}
+
 	jobRepository := jobs.NewRepository(db)
 	jobHandler := api.NewJobHandler(jobRepository)
 

@@ -54,6 +54,11 @@ func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := h.rabbitmq.PublishJob(id.String()); err != nil {
+		http.Error(w, "failed to publish job", http.StatusInternalServerError)
+		return
+	}
+
 	response := map[string]any{
 		"id": id,
 		"status": "pending",

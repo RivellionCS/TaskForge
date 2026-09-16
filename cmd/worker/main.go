@@ -7,6 +7,7 @@ import (
 	"github.com/RivellionCS/TaskForge/internal/database"
 	"github.com/RivellionCS/TaskForge/internal/jobs"
 	"github.com/RivellionCS/TaskForge/internal/queue"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -36,8 +37,27 @@ func main() {
 	}
 
 	log.Println("TaskForge worker waiting for jobs...")
-	
+
 	for message := range messages {
-		log.Printf("Received job: %s", message.Body)
+		jobID, err := uuid.Parse(string(message.Body))
+		if err != nil {
+			log.Printf("Invalid job ID: %s", message.Body)
+			message.Nack(false, false)
+			continue
+		}
+
+		job, err := repository.GetByID(ctx, jobID)
+		if err != nil {
+			log.Printf("Failed to get job %s: %v", jobID, err)
+			message.Nack(false, true)
+			continue
+		}
+
+		log.Printf(
+			"Recieved job: id=%s type=%s status=%s",
+			job.ID,
+			job.Type,
+			job.Status,
+		)
 	}
 }

@@ -115,7 +115,7 @@ func (r *Repository) MarkCompleted(
 		ctx,
 		`
 		UPDATE jobs
-		SET status = $1
+		SET status = $1,
 			completed_at = NOW()
 		WHERE id = $2
 		`,

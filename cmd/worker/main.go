@@ -53,11 +53,19 @@ func main() {
 			continue
 		}
 
+		if err := repository.UpdateStatus(ctx, job.ID, "running"); err != nil {
+			log.Printf("Failed to update job %s status: %v", job.ID, err)
+			message.Nack(false, true)
+			continue
+		}
+
 		log.Printf(
-			"Recieved job: id=%s type=%s status=%s",
+			"Job started: id=%s type=%s status=running",
 			job.ID,
 			job.Type,
-			job.Status,
+
 		)
+
+		message.Ack(false)
 	}
 }

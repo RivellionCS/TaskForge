@@ -83,3 +83,26 @@ func (r *Repository) GetByID(
 
 	return &job, nil
 }
+
+func (r *Repository) UpdateStatus(
+	ctx context.Context,
+	id uuid.UUID,
+	status string,
+) error {
+	_, err := r.db.Exec(
+		ctx,
+		`
+		UPDATE jobs
+		SET status = $1
+		WHERE id = $2
+		`,
+		status,
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("update job status: %w", err)
+	}
+
+	return nil
+}

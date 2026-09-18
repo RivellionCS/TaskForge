@@ -72,6 +72,12 @@ func main() {
 			continue
 		}
 
+		if err := repository.MarkCompleted(ctx, job.ID); err != nil {
+			log.Printf("Failed to mark job %s as completed: %v", job.ID, err)
+			message.Nack(false, true)
+			continue
+		}
+
 		log.Printf("Job completed: id=%s", job.ID)
 
 		message.Ack(false)

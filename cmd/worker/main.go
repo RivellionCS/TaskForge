@@ -66,6 +66,14 @@ func main() {
 
 		)
 
+		if err := jobs.Execute(job); err != nil {
+			log.Printf("Job %s failed: %v", job.ID, err)
+			message.Nack(false, true)
+			continue
+		}
+
+		log.Printf("Job completed: id=%s", job.ID)
+
 		message.Ack(false)
 	}
 }

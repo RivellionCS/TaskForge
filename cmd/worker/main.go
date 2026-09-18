@@ -53,7 +53,7 @@ func main() {
 			continue
 		}
 
-		if err := repository.UpdateStatus(ctx, job.ID, "running"); err != nil {
+		if err := repository.MarkRunning(ctx, job.ID); err != nil {
 			log.Printf("Failed to update job %s status: %v", job.ID, err)
 			message.Nack(false, true)
 			continue

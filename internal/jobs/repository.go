@@ -84,24 +84,24 @@ func (r *Repository) GetByID(
 	return &job, nil
 }
 
-func (r *Repository) UpdateStatus(
+func (r *Repository) MarkRunning(
 	ctx context.Context,
 	id uuid.UUID,
-	status string,
 ) error {
 	_, err := r.db.Exec(
 		ctx,
 		`
 		UPDATE jobs
-		SET status = $1
+		SET status = $1,
+			started_at = NOW()
 		WHERE id = $2
 		`,
-		status,
+		"running",
 		id,
 	)
 
 	if err != nil {
-		return fmt.Errorf("update job status: %w", err)
+		return fmt.Errorf("mark job running: %w", err)
 	}
 
 	return nil

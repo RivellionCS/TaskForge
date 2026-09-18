@@ -106,3 +106,26 @@ func (r *Repository) MarkRunning(
 
 	return nil
 }
+
+func (r *Repository) MarkCompleted(
+	ctx context.Context,
+	id uuid.UUID,
+) error {
+	_, err := r.db.Exec(
+		ctx,
+		`
+		UPDATE jobs
+		SET status = $1
+			completed_at = NOW()
+		WHERE id = $2
+		`,
+		"completed",
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("mark job completed: %w", err)
+	}
+
+	return nil
+}

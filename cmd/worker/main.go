@@ -67,7 +67,24 @@ func main() {
 		)
 
 		if err := jobs.Execute(job); err != nil {
-			log.Printf("Job %s failed: %v", job.ID, err)
+			attempts, attemptsErr := repository.IncrementAttempts(ctx, job.ID)
+			if attemptsErr != nil {
+				log.Printf(
+					"Failed to increment attempts for job %s: %v",
+					job.ID,
+					attemptsErr,
+				)
+				message.Nack(false, true)
+				continue
+			}
+
+			log.Printf(
+				"Job %s failed: %v (attempt %d)",
+				job.ID,
+				err,
+				attempts,
+			)
+
 			message.Nack(false, true)
 			continue
 		}

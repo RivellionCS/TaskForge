@@ -153,3 +153,26 @@ func (r *Repository) IncrementAttempts(
 
 	return attempts, nil
 }
+
+func (r *Repository) MarkFailed(
+	ctx context.Context,
+	id uuid.UUID,
+) error {
+	_, err := r.db.Exec(
+		ctx,
+		`
+		UPDATE jobs
+		SET status = $1,
+			completed_at = NOW()
+		WHERE id = $2
+		`,
+		"failed",
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("mark job failed: %w", err)
+	}
+
+	return nil
+}

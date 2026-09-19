@@ -129,3 +129,27 @@ func (r *Repository) MarkCompleted(
 
 	return nil
 }
+
+func (r *Repository) IncrementAttempts(
+	ctx context.Context,
+	id uuid.UUID,
+) (int, error) {
+	var attempts int
+
+	err := r.db.QueryRow(
+		ctx,
+		`
+		UPDATE jobs
+		SET attempts = attempts + 1
+		WHERE id = $1
+		RETURNING attempts
+		`,
+		id,
+	).Scan(&attempts)
+
+	if err != nil {
+		return 0, fmt.Errorf("increment job attempts: %w", err)
+	}
+
+	return attempts, nil
+}

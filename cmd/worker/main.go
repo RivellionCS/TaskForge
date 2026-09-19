@@ -85,6 +85,22 @@ func main() {
 				attempts,
 			)
 
+			if attempts >= 3 {
+				if err := repository.MarkFailed(ctx, job.ID); err != nil {
+					log.Printf(
+						"Failed to mark job %s as failed: %v",
+						job.ID,
+						err,
+					)
+					message.Nack(false, true)
+					continue
+				}
+
+				log.Printf("Job permanently failed: id=%s", job.ID)
+				message.Ack(false)
+				continue
+			}
+
 			message.Nack(false, true)
 			continue
 		}

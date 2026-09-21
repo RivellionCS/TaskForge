@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Execute(job *Job) error {
+func Execute(job *Job) (map[string]any, error) {
 	switch job.Type {
 	case "sleep":
 		var payload struct {
@@ -14,18 +14,20 @@ func Execute(job *Job) error {
 		}
 
 		if err := json.Unmarshal(job.Payload, &payload); err != nil {
-			return fmt.Errorf("decode sleep payload: %w", err)
+			return nil ,fmt.Errorf("decode sleep payload: %w", err)
 		}
 
 		if payload.Seconds < 0 {
-			return fmt.Errorf("seconds cannot be negative")
+			return nil, fmt.Errorf("seconds cannot be negative")
 		}
 
 		time.Sleep(time.Duration(payload.Seconds) * time.Second)
 
-		return nil
+		return map[string]any{
+			"message": fmt.Sprintf("slept for %d seconds", payload.Seconds),
+		}, nil
 
 	default:
-		return fmt.Errorf("unknown job type: %s", job.Type)
+		return nil, fmt.Errorf("unknown job type: %s", job.Type)
 	}
 }

@@ -66,7 +66,8 @@ func main() {
 
 		)
 
-		if err := jobs.Execute(job); err != nil {
+		result, err := jobs.Execute(job)
+		if err != nil {
 			attempts, attemptsErr := repository.IncrementAttempts(ctx, job.ID)
 			if attemptsErr != nil {
 				log.Printf(
@@ -101,6 +102,12 @@ func main() {
 				continue
 			}
 
+			message.Nack(false, true)
+			continue
+		}
+
+		if err := repository.SetResult(ctx, job.ID, result); err != nil {
+			log.Printf("Failed to save result for job %s: %v", job.ID, err)
 			message.Nack(false, true)
 			continue
 		}

@@ -176,3 +176,31 @@ func (r *Repository) MarkFailed(
 
 	return nil
 }
+
+func (r *Repository) SetResult(
+	ctx context.Context,
+	id uuid.UUID,
+	result map[string]any,
+) error {
+	resultJSON, err := json.Marshal(result)
+	if err != nil {
+		return fmt.Errorf("marshal job result: %w", err)
+	}
+
+	_, err = r.db.Exec(
+		ctx,
+		`
+		UPDATE jobs
+		SET result = $1
+		WHERE id = $2
+		`,
+		resultJSON,
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("set job result: %w", err)
+	}
+
+	return nil
+}

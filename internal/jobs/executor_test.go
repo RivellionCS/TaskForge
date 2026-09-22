@@ -42,7 +42,7 @@ func TestExecuteUnknownJobType(t *testing.T) {
 
 	_, err := Execute(job)
 
-	if err != nil {
+	if err == nil {
 		t.Fatal("expected error for the unkown job type")
 	}
 }

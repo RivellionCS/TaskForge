@@ -87,7 +87,7 @@ func main() {
 			)
 
 			if attempts >= 3 {
-				if err := repository.MarkFailed(ctx, job.ID); err != nil {
+				if err := repository.MarkFailed(ctx, job.ID, err.Error()); err != nil {
 					log.Printf(
 						"Failed to mark job %s as failed: %v",
 						job.ID,

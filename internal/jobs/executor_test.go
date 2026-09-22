@@ -32,3 +32,17 @@ func TestExecuteSleep(t *testing.T) {
 		t.Fatalf("expected job to take at least 1 second, took %v", duration)
 	}
 }
+
+func TestExecuteUnknownJobType(t *testing.T) {
+	job := &Job{
+		ID: uuid.New(),
+		Type: "does-not-exist",
+		Payload: []byte(`{}`),
+	}
+
+	_, err := Execute(job)
+
+	if err != nil {
+		t.Fatal("expected error for the unkown job type")
+	}
+}

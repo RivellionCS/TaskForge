@@ -60,3 +60,17 @@ func TestExecuteInvalidSleepPayload(t *testing.T) {
 		t.Fatal("expected error for invalid payload")
 	}
 }
+
+func TestExecuteNegativeSleep(t *testing.T) {
+	job := &Job{
+		ID: uuid.New(),
+		Type: "sleep",
+		Payload: []byte(`{"seconds":-1}`),
+	}
+
+	_, err := Execute(job)
+
+	if err == nil {
+		t.Fatal("expected error for negative seconds")
+	}
+}

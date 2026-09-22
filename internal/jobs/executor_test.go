@@ -46,3 +46,17 @@ func TestExecuteUnknownJobType(t *testing.T) {
 		t.Fatal("expected error for the unkown job type")
 	}
 }
+
+func TestExecuteInvalidSleepPayload(t *testing.T) {
+	job := &Job {
+		ID: uuid.New(),
+		Type: "sleep",
+		Payload: []byte(`{}`),
+	}
+
+	_, err := Execute(job)
+
+	if err == nil {
+		t.Fatal("expected error for invalid payload")
+	}
+}

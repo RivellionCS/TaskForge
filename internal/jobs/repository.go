@@ -157,16 +157,27 @@ func (r *Repository) IncrementAttempts(
 func (r *Repository) MarkFailed(
 	ctx context.Context,
 	id uuid.UUID,
+	errMessage string,
 ) error {
-	_, err := r.db.Exec(
+	resultJSON, err := json.Marshal(map[string]any{
+		"error": errMessage,
+	})
+
+	if err != nil {
+		return fmt.Errorf("marshal failure result: %w", err)
+	}
+
+	_, err = r.db.Exec(
 		ctx,
 		`
 		UPDATE jobs
 		SET status = $1,
+			result = $2,
 			completed_at = NOW()
-		WHERE id = $2
+		WHERE id = $3
 		`,
 		"failed",
+		resultJSON,
 		id,
 	)
 

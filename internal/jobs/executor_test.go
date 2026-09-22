@@ -51,7 +51,7 @@ func TestExecuteInvalidSleepPayload(t *testing.T) {
 	job := &Job {
 		ID: uuid.New(),
 		Type: "sleep",
-		Payload: []byte(`{}`),
+		Payload: []byte(`not valid json`),
 	}
 
 	_, err := Execute(job)

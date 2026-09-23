@@ -54,4 +54,17 @@ func TestRepositoryCreate(t *testing.T) {
 	if jobID == uuid.Nil {
 		t.Fatal("expected a job ID")
 	}
+
+	job, err := repository.GetByID(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to get created job: %v", err)
+	}
+
+	if job.Type != "sleep" {
+		t.Fatalf("expected type sleep, got %s", job.Type)
+	}
+
+	if job.Status != "pending" {
+		t.Fatalf("expected status pending, got %s", job.Status)
+	}
 }

@@ -98,7 +98,7 @@ func TestRepositoryMarkRunning(t *testing.T) {
 	}
 
 	if job.Status != "running" {
-		t.Fatalf("expected ststus running, got %s", job.Status)
+		t.Fatalf("expected status running, got %s", job.Status)
 	}
 
 	if job.StartedAt == nil {

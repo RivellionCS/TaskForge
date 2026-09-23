@@ -68,3 +68,40 @@ func TestRepositoryCreate(t *testing.T) {
 		t.Fatalf("expected status pending, got %s", job.Status)
 	}
 }
+
+func TestRepositoryMarkRunning(t *testing.T) {
+	ctx := context.Background()
+	db := newTestDB(t)
+
+	repository := NewRepository(db)
+
+	jobID, err := repository.Create(
+		ctx,
+		"sleep",
+		map[string]any{
+			"seconds": 5,
+		},
+	)
+
+	if err != nil {
+		t.Fatalf("failed to create job: %v", err)
+	}
+
+	err = repository.MarkRunning(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to mark job as running: %v", err)
+	}
+
+	job, err := repository.GetByID(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to get job: %v", err)
+	}
+
+	if job.Status != "running" {
+		t.Fatalf("expected ststus running, got %s", job.Status)
+	}
+
+	if job.StartedAt == nil {
+		t.Fatal("expected started_at to be set")
+	}
+}

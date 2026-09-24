@@ -178,8 +178,16 @@ func TestGetJob(t *testing.T) {
 		t.Fatalf("expected job status pending, got %s", response.Status)
 	}
 
-	if string(response.Payload) != `{"seconds": 5}` {
-		t.Fatalf("unexpected payload: %s", response.Payload)
+	var payload struct {
+		Seconds int `json:"seconds"`
+	}
+
+	if err := json.Unmarshal(response.Payload, &payload); err != nil {
+		t.Fatalf("failed to decode payload: %v", err)
+	}
+
+	if payload.Seconds != 5 {
+		t.Fatalf("expected payload seconds 5, got %d", payload.Seconds)
 	}
 }
 

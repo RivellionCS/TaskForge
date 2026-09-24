@@ -3,15 +3,16 @@ package database
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func NewPool(ctx context.Context) (*pgxpool.Pool, error) {
-	config, err := pgxpool.ParseConfig(
-		"postgres://taskforge:taskforge@localhost:5432/taskforge",
-	)
+	databaseURL := os.Getenv("DATABASE_URL")
+	
+	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("parse database config: %w", err)
 	}

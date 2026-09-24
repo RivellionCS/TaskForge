@@ -267,3 +267,31 @@ func TestCreateJobInvalidJSON(t *testing.T) {
 		)
 	}
 }
+
+func TestGetJobInvalidID(t *testing.T) {
+	db := newTestDB(t)
+
+	repository := jobs.NewRepository(db)
+
+	handler := NewJobHandler(repository, nil)
+
+	request := httptest.NewRequest(
+		http.MethodGet,
+		"/jobs/not-a-uuid",
+		nil,
+	)
+
+	request.SetPathValue("id", "not-a-uuid")
+
+	recorder := httptest.NewRecorder()
+
+	handler.GetJob(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf(
+			"expected status %d, got %d",
+			http.StatusBadRequest,
+			recorder.Code,
+		)
+	}
+}

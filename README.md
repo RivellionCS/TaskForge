@@ -111,7 +111,7 @@ TaskForge/
 - `internal/queue` — RabbitMQ integration
 - `migrations` — database schema migrations
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
@@ -155,7 +155,7 @@ The application uses the following services:
 - RabbitMQ — `localhost:5672`
 - RabbitMQ Management UI — `localhost:15672`
 
-## API Usage
+## Usage
 
 ### Create a Job
 
@@ -272,3 +272,18 @@ The `.env` file is excluded from version control through `.gitignore`.
 ## License
 
 This project is intended as a backend development portfolio project.
+
+## Contributing
+
+Contributions are welcome. If you would like to contribute to TaskForge:
+
+Fork the repository.
+Create a new branch for your changes.
+Make your changes and add or update tests where appropriate.
+
+Run the test suite:
+
+go test ./...
+Commit your changes and open a pull request.
+
+For larger changes, opening an issue first to discuss the proposed approach is encouraged.

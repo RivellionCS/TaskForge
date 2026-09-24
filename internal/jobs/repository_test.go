@@ -144,3 +144,40 @@ func TestRepositoryIncrementAttempts(t *testing.T) {
 		t.Fatalf("expected attempts to be 2, got %d", attempts)
 	}
 }
+
+func TestRepositorySetResult(t *testing.T) {
+	ctx := context.Background()
+	db := newTestDB(t)
+
+	repository := NewRepository(db)
+
+	jobID, err := repository.Create(
+		ctx,
+		"sleep",
+		map[string]any{
+			"seconds": 5,
+		},
+	)
+
+	if err != nil {
+		t.Fatalf("failed to create job: %v", err)
+	}
+
+	result := map[string]any{
+		"message": "slept for 5 seconds",
+	}
+
+	err = repository.SetResult(ctx, jobID, result)
+	if err != nil {
+		t.Fatalf("failed to set result: %v", err)
+	}
+
+	job, err := repository.GetByID(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to get job: %v", err)
+	}
+
+	if string(job.Result) != `{"message": "slept for 5 seconds"}` {
+		t.Fatalf("unexpected result: %s", job.Result)
+	}
+}

@@ -181,3 +181,88 @@ func TestRepositorySetResult(t *testing.T) {
 		t.Fatalf("unexpected result: %s", job.Result)
 	}
 }
+
+func TestRepositoryMarkCompleted(t *testing.T) {
+	ctx := context.Background()
+	db := newTestDB(t)
+
+	repository := NewRepository(db)
+
+	jobID, err := repository.Create(
+		ctx,
+		"sleep",
+		map[string]any{
+			"seconds": 5,
+		},
+	)
+
+	if err != nil {
+		t.Fatalf("failed to create job: %v", err)
+	}
+
+	err = repository.MarkCompleted(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to mark job as running %v", err)
+	}
+
+	job, err := repository.GetByID(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to get job: %v", err)
+	}
+
+	if job.Status != "completed" {
+		t.Fatalf("expected status completed, got %s", job.Status)
+	}
+
+	if job.CompletedAt == nil {
+		t.Fatal("expected completed_at to be set")
+	}
+}
+
+func TestRepositoryMarkFailed(t *testing.T) {
+	ctx := context.Background()
+	db := newTestDB(t)
+
+	repository := NewRepository(db)
+
+	jobID, err := repository.Create(
+		ctx,
+		"does-not-exist",
+		map[string]any{},
+	)
+	
+	if err != nil {
+		t.Fatalf("failed to create job: %v", err)
+	}
+
+	err = repository.MarkRunning(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to mark job as running: %v", err)
+	}
+
+	err = repository.MarkFailed(
+		ctx,
+		jobID,
+		"unknown job type: does-not-exist",
+	)
+	if err != nil {
+		t.Fatalf("failed to mark job as failed: %v", err)
+	}
+
+	job, err := repository.GetByID(ctx, jobID)
+	if err != nil {
+		t.Fatalf("failed to get job: %v", err)
+	}
+
+	if job.Status != "failed" {
+		t.Fatalf("expected status failed, got %s", job.Status)
+	}
+
+	if job.CompletedAt == nil {
+		t.Fatal("expected completed_at to be set")
+	}
+
+	if string(job.Result) != `{"error": "unknown job type: does-not-exist"}` {
+		t.Fatalf("unexpected result: %s", job.Result)
+	}
+}

@@ -105,3 +105,42 @@ func TestRepositoryMarkRunning(t *testing.T) {
 		t.Fatal("expected started_at to be set")
 	}
 }
+
+func TestRepositoryIncrementAttempts(t *testing.T) {
+	ctx := context.Background()
+	db := newTestDB(t)
+
+	repository := NewRepository(db)
+
+	jobID, err := repository.Create(
+		ctx,
+		"sleep",
+		map[string]any{
+			"seconds": 5,
+		},
+	)
+
+	if err != nil {
+		t.Fatalf("failed to create job: %v", err)
+	}
+
+	attempts, err := repository.IncrementAttempts(ctx, jobID)
+
+	if err != nil {
+		t.Fatalf("failed to increment attempts: %v", err)
+	}
+
+	if attempts != 1 {
+		t.Fatalf("expected attempts to be 1, got %d", attempts)
+	}
+
+	attempts, err = repository.IncrementAttempts(ctx, jobID)
+
+	if err != nil {
+		t.Fatalf("failed to increment attempts: %v", err)
+	}
+
+	if attempts != 2 {
+		t.Fatalf("expected attempts to be 2, got %d", attempts)
+	}
+}

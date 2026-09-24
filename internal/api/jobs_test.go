@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -77,5 +78,22 @@ func TestCreateJob(t *testing.T) {
 			http.StatusCreated,
 			recorder.Code,
 		)
+	}
+
+	var response struct {
+		ID string `json:"id"`
+		Status string `json:"status"`
+	}
+
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if response.ID == "" {
+		t.Fatal("expected job ID in response")
+	}
+
+	if response.Status != "pending" {
+		t.Fatalf("expected status pending, got %s", response.Status)
 	}
 }

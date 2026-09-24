@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/RivellionCS/TaskForge/internal/database"
 	"github.com/RivellionCS/TaskForge/internal/jobs"
@@ -36,90 +39,104 @@ func main() {
 		log.Fatal(err)
 	}
 
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
 	log.Println("TaskForge worker waiting for jobs...")
 
-	for message := range messages {
-		jobID, err := uuid.Parse(string(message.Body))
-		if err != nil {
-			log.Printf("Invalid job ID: %s", message.Body)
-			message.Nack(false, false)
-			continue
-		}
+	for {
+		select {
+		case <-stop:
+			log.Println("Shutting down worker...")
+			return
 
-		job, err := repository.GetByID(ctx, jobID)
-		if err != nil {
-			log.Printf("Failed to get job %s: %v", jobID, err)
-			message.Nack(false, true)
-			continue
-		}
+		case message, ok := <-messages:
+			if !ok {
+				log.Println("RabbitMQ consumer closed")
+				return
+			}
 
-		if err := repository.MarkRunning(ctx, job.ID); err != nil {
-			log.Printf("Failed to update job %s status: %v", job.ID, err)
-			message.Nack(false, true)
-			continue
-		}
+			jobID, err := uuid.Parse(string(message.Body))
+			if err != nil {
+				log.Printf("Invalid job ID: %s", message.Body)
+				message.Nack(false, false)
+				continue
+			}
 
-		log.Printf(
-			"Job started: id=%s type=%s status=running",
-			job.ID,
-			job.Type,
+			job, err := repository.GetByID(ctx, jobID)
+			if err != nil {
+				log.Printf("Failed to get job %s: %v", jobID, err)
+				message.Nack(false, true)
+				continue
+			}
 
-		)
-
-		result, err := jobs.Execute(job)
-		if err != nil {
-			attempts, attemptsErr := repository.IncrementAttempts(ctx, job.ID)
-			if attemptsErr != nil {
-				log.Printf(
-					"Failed to increment attempts for job %s: %v",
-					job.ID,
-					attemptsErr,
-				)
+			if err := repository.MarkRunning(ctx, job.ID); err != nil {
+				log.Printf("Failed to update job %s status: %v", job.ID, err)
 				message.Nack(false, true)
 				continue
 			}
 
 			log.Printf(
-				"Job %s failed: %v (attempt %d)",
+				"Job started: id=%s type=%s status=running",
 				job.ID,
-				err,
-				attempts,
+				job.Type,
 			)
 
-			if attempts >= 3 {
-				if err := repository.MarkFailed(ctx, job.ID, err.Error()); err != nil {
+			result, err := jobs.Execute(job)
+			if err != nil {
+				attempts, attemptsErr := repository.IncrementAttempts(ctx, job.ID)
+				if attemptsErr != nil {
 					log.Printf(
-						"Failed to mark job %s as failed: %v",
+						"Failed to increment attempts for job %s: %v",
 						job.ID,
-						err,
+						attemptsErr,
 					)
 					message.Nack(false, true)
 					continue
 				}
 
-				log.Printf("Job permanently failed: id=%s", job.ID)
-				message.Ack(false)
+				log.Printf(
+					"Job %s failed: %v (attempt %d)",
+					job.ID,
+					err,
+					attempts,
+				)
+
+				if attempts >= 3 {
+					if err := repository.MarkFailed(ctx, job.ID, err.Error()); err != nil {
+						log.Printf(
+							"Failed to mark job %s as failed: %v",
+							job.ID,
+							err,
+						)
+						message.Nack(false, true)
+						continue
+					}
+
+					log.Printf("Job permanently failed: id=%s", job.ID)
+					message.Ack(false)
+					continue
+				}
+
+				message.Nack(false, true)
 				continue
 			}
 
-			message.Nack(false, true)
-			continue
+			if err := repository.SetResult(ctx, job.ID, result); err != nil {
+				log.Printf("Failed to save result for job %s: %v", job.ID, err)
+				message.Nack(false, true)
+				continue
+			}
+
+			if err := repository.MarkCompleted(ctx, job.ID); err != nil {
+				log.Printf("Failed to mark job %s as completed: %v", job.ID, err)
+				message.Nack(false, true)
+				continue
+			}
+
+			log.Printf("Job completed: id=%s", job.ID)
+
+			message.Ack(false)
 		}
-
-		if err := repository.SetResult(ctx, job.ID, result); err != nil {
-			log.Printf("Failed to save result for job %s: %v", job.ID, err)
-			message.Nack(false, true)
-			continue
-		}
-
-		if err := repository.MarkCompleted(ctx, job.ID); err != nil {
-			log.Printf("Failed to mark job %s as completed: %v", job.ID, err)
-			message.Nack(false, true)
-			continue
-		}
-
-		log.Printf("Job completed: id=%s", job.ID)
-
-		message.Ack(false)
 	}
 }

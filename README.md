@@ -4,6 +4,16 @@ TaskForge is a Go backend job processing system that accepts jobs through a REST
 
 The project demonstrates backend development concepts including REST APIs, asynchronous job processing, database persistence, message queues, retries, error handling, graceful shutdown, Docker, and automated testing.
 
+## Motivation
+
+I created TaskForge as a hands-on project to deepen my understanding of backend development and build something that reflects the kinds of systems I want to work on as a junior developer.
+
+Rather than building a simple CRUD application, I wanted to explore how a backend can handle work asynchronously. This led me to design TaskForge around a REST API, PostgreSQL for persistent job state, RabbitMQ for message queuing, and a separate worker responsible for executing jobs.
+
+The project also gave me an opportunity to practice several areas that are important in backend development, including database design, API development, concurrency, message processing, retries and failure handling, automated testing, Docker, and graceful application shutdown.
+
+My goal with TaskForge was to take the concepts I've been learning and bring them together into one practical project that demonstrates how the different pieces of a backend system work together.
+
 ## Features
 
 - Create and retrieve jobs through a REST API

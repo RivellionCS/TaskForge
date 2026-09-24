@@ -295,3 +295,33 @@ func TestGetJobInvalidID(t *testing.T) {
 		)
 	}
 }
+
+func TestGetJobNotFound(t *testing.T) {
+	db := newTestDB(t)
+
+	repository := jobs.NewRepository(db)
+
+	handler := NewJobHandler(repository, nil)
+
+	jobID := uuid.New()
+
+	request := httptest.NewRequest(
+		http.MethodGet,
+		"/jobs/"+jobID.String(),
+		nil,
+	)
+
+	request.SetPathValue("id", jobID.String())
+
+	recorder := httptest.NewRecorder()
+
+	handler.GetJob(recorder, request)
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf(
+			"expected status %d, got %d",
+			http.StatusNotFound,
+			recorder.Code,
+		)
+	}
+}

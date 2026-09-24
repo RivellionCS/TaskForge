@@ -120,3 +120,43 @@ func TestCreateJob(t *testing.T) {
 		t.Fatalf("unexpected job payload: %s", job.Payload)
 	}
 }
+
+func TestGetJob(t *testing.T) {
+	db := newTestDB(t)
+
+	repository := jobs.NewRepository(db)
+
+	jobID, err := repository.Create(
+		context.Background(),
+		"sleep",
+		map[string]any{
+			"seconds": 5,
+		},
+	)
+
+	if err != nil {
+		t.Fatalf("failed to create job: %v", err)
+	}
+
+	handler := NewJobHandler(repository, nil)
+
+	request := httptest.NewRequest(
+		http.MethodGet,
+		"/jobs/"+jobID.String(),
+		nil,
+	)
+
+	request.SetPathValue("id", jobID.String())
+
+	recorder := httptest.NewRecorder()
+
+	handler.GetJob(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf(
+			"expected status %d, got %d",
+			http.StatusOK,
+			recorder.Code,
+		)
+	}
+}

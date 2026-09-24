@@ -30,5 +30,13 @@ services:
     ports:
       - "8080:8080"
 
+  worker:
+    build: .
+    container_name: taskforge-worker
+    command: ["./worker"]
+    environment:
+      DATABASE_URL: postgres://taskforge:taskforge@postgres:5432/taskforge
+      RABBITMQ_URL: amqp://taskforge:taskforge@rabbitmq:5672/
+
 volumes:
   postgres_data:

@@ -25,8 +25,8 @@ services:
     build: .
     container_name: taskforge-api
     environment:
-      DATABASE_URL: postgres://taskforge:taskforge@postgres:5432/taskforge
-      RABBITMQ_URL: amqp://taskforge:taskforge@rabbitmq:5672/
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      RABBITMQ_URL: ${RABBITMQ_URL_DOCKER}
     ports:
       - "8080:8080"
 
@@ -35,8 +35,8 @@ services:
     container_name: taskforge-worker
     command: ["./worker"]
     environment:
-      DATABASE_URL: postgres://taskforge:taskforge@postgres:5432/taskforge
-      RABBITMQ_URL: amqp://taskforge:taskforge@rabbitmq:5672/
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      RABBITMQ_URL: ${RABBITMQ_URL_DOCKER}
 
 volumes:
   postgres_data:

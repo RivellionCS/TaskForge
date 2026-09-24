@@ -170,6 +170,10 @@ func TestGetJob(t *testing.T) {
 		t.Fatalf("expected job ID %s, got %s", jobID, response.ID)
 	}
 
+	if response.Type != "sleep" {
+		t.Fatalf("expected job type sleep, got %s", response.Type)
+	}
+
 	if response.Status != "pending" {
 		t.Fatalf("expected job status pending, got %s", response.Status)
 	}

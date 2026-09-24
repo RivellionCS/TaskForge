@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -12,7 +13,9 @@ type RabbitMQ struct {
 }
 
 func NewRabbitMQ() (*RabbitMQ, error) {
-	conn, err := amqp.Dial("amqp://taskforge:taskforge@localhost:5672")
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+
+	conn, err := amqp.Dial(rabbitmqURL)
 	if err != nil {
 		return nil, fmt.Errorf("Connect to RabbitMQ: %w", err)
 	}

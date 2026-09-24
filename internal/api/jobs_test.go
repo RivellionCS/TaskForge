@@ -225,7 +225,7 @@ func TestCreateJobMissingType(t *testing.T) {
 	}
 }
 
-func TestCreateJobInvalidJSONN(t *testing.T) {
+func TestCreateJobInvalidJSON(t *testing.T) {
 	db := newTestDB(t)
 
 	repository := jobs.NewRepository(db)

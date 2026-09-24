@@ -159,4 +159,22 @@ func TestGetJob(t *testing.T) {
 			recorder.Code,
 		)
 	}
+
+	var response jobs.Job
+	
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if response.ID != jobID {
+		t.Fatalf("expected job ID %s, got %s", jobID, response.ID)
+	}
+
+	if response.Status != "pending" {
+		t.Fatalf("expected job status pending, got %s", response.Status)
+	}
+
+	if string(response.Payload) != `{"seconds": 5}` {
+		t.Fatalf("unexpected payload: %s", response.Payload)
+	}
 }
